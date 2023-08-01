@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:timezone/browser.dart';
+import '../../models/db_models/schedule_task.dart';
 import '../../models/db_models/todo_model.dart';
 
 class TodoDBHelper {
@@ -73,5 +76,74 @@ class TodoDBHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+  Future<void> _showNotification(String title, String body) async {
+    FlutterLocalNotificationsPlugin notificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'your_channel_name',
+      'your_channel_description',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const IOSNotificationDetails iOSPlatformChannelSpecifics =
+    IOSNotificationDetails();
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    await notificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: 'Scheduled Todo',
+    );
+  }
+  Future<void> scheduleTodo(ScheduleTaskModel todo) async {
+    // Schedule the todo for the specified time
+    var scheduledTime = todo.scheduledTime;
+    var difference = scheduledTime.difference(DateTime.now()).inSeconds;
+
+    if (difference <= 0) {
+      // If the scheduled time is in the past, show the notification immediately
+      _showNotification('Your Todo', todo.title);
+    } else {
+      // Otherwise, schedule the notification for the future
+      FlutterLocalNotificationsPlugin notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+        'your_channel_name',
+        'your_channel_description',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+      const IOSNotificationDetails iOSPlatformChannelSpecifics =
+      IOSNotificationDetails();
+      const NotificationDetails platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics,
+      );
+      tz.initializeTimeZones(); // Initialize time zones
+      String timeZoneName = await platformTimeZone; // Get the device's time zone name
+      tz.setLocalLocation(tz.getLocation(timeZoneName)); // Set the device's time zone
+
+
+      await notificationsPlugin.zonedSchedule(
+        0,
+        'Your Todo',
+        todo.title,
+        TZDateTime.from(scheduledTime, tz.local), // Use the scheduled time in the device's timezone
+        platformChannelSpecifics,
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
+
+    // Insert the todo into the database
   }
 }

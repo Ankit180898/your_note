@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:your_note/screens/widgets/custom_fab.dart';
 import 'package:your_note/services/dbhelper/todo_helper.dart';
 
 import '../models/db_models/todo_model.dart';
@@ -12,54 +13,220 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void _showFullScreenDialog(BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: OutlineInputBorder(),
+            insetPadding: EdgeInsets.zero, // Remove default padding
+            child: Container(
+           width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+
+                  // Add your dialog content here
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Close'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Align(alignment: Alignment.bottomRight,child: CustomFAB(onPressed: (){})),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: CustomFAB(
         onPressed: () {
           showModalBottomSheet<void>(
               isDismissible: true,
+              showDragHandle: true,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                       topRight: Radius.circular(20),
                       topLeft: Radius.circular(20))),
               context: context,
               builder: (BuildContext context) {
-                return SizedBox(
-                  height: 200,
+                return Container(
+                  height: MediaQuery.of(context).size.height * 0.30,
+                  padding: EdgeInsets.only(left: 30,top: 30,right: 30),
                   child: Center(
                     child: ListView(
                       children: [
-                        FilledButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                          ).copyWith(
-                              elevation: ButtonStyleButton.allOrNull(0.0)),
-                          onPressed: () {},
-                          child: const Text('Filled'),
+                        Align(alignment: Alignment.center,child: Text("What do you want to add?")),
+                        const SizedBox(height: 20,),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            )
+                          ),
+                          child: FilledButton.tonal(
+                            style: ButtonStyle(
+                              alignment: Alignment.center,
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(topRight: Radius.circular(30.0),topLeft: Radius.circular(30.0),bottomRight:Radius.circular(10.0),bottomLeft: Radius.circular(10.0) ),
+                                ),
+                              ),
+                            ),
+                            onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Add'),
+                                      content: TextField(
+                                        controller: textController,
+                                        decoration: InputDecoration(
+                                          hintText: 'Todo',
+                                        ),
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: const Text('Add'),
+                                          onPressed: () async {
+                                            if (textController.text.isNotEmpty) {
+                                              Todo newTodo = Todo(
+                                                id: DateTime.now().millisecondsSinceEpoch,
+                                                title: textController.text,
+                                              );
+                                              await dbHelper.insertTodo(newTodo);
+                                              textController.clear();
+                                              dbHelper.getTodos();
+                                              Get.back();
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                            },
+                            child: const Text('Todo'),
+                          ),
                         ),
-                        FilledButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                          ).copyWith(
-                              elevation: ButtonStyleButton.allOrNull(0.0)),
-                          onPressed: () {},
-                          child: const Text('Filled'),
+                        const SizedBox(height: 5,),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              )
+                          ),
+                          child: FilledButton.tonal(
+                            style: ButtonStyle(
+                              alignment: Alignment.center,
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Add'),
+                                    content: TextField(
+                                      controller: textController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Todo',
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text('Add'),
+                                        onPressed: () async {
+                                          if (textController.text.isNotEmpty) {
+                                            Todo newTodo = Todo(
+                                              id: DateTime.now().millisecondsSinceEpoch,
+                                              title: textController.text,
+                                            );
+                                            await dbHelper.insertTodo(newTodo);
+                                            textController.clear();
+                                            dbHelper.getTodos();
+                                            Get.back();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text('Todo'),
+                          ),
                         ),
-                        FilledButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                          ).copyWith(
-                              elevation: ButtonStyleButton.allOrNull(0.0)),
-                          onPressed: () {},
-                          child: const Text('Filled'),
+                        const SizedBox(height: 5,),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              )
+                          ),
+                          child: FilledButton.tonal(
+                            style: ButtonStyle(
+                              alignment: Alignment.center,
+                              shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0),bottomRight: Radius.circular(30.0),topRight:Radius.circular(10.0),topLeft: Radius.circular(10.0) ),
+                          ),
+                        ),
+                            ),
+
+                            onPressed: () {
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Add'),
+                                    content: TextField(
+                                      controller: textController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Todo',
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text('Add'),
+                                        onPressed: () async {
+                                          if (textController.text.isNotEmpty) {
+                                            Todo newTodo = Todo(
+                                              id: DateTime.now().millisecondsSinceEpoch,
+                                              title: textController.text,
+                                            );
+                                            await dbHelper.insertTodo(newTodo);
+                                            textController.clear();
+                                            dbHelper.getTodos();
+                                            Get.back();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text('Todo'),
+                          ),
                         ),
                       ],
                     ),
@@ -67,7 +234,6 @@ class HomeScreen extends StatelessWidget {
                 );
               });
         },
-        child: Icon(Icons.add),
       ),
       drawer: Drawer(
           shape: RoundedRectangleBorder(
@@ -238,10 +404,13 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.20,
-                decoration: BoxDecoration(
-                    color: Colors.grey, borderRadius: BorderRadius.circular(20)),
+              InkWell(
+                onTap: ()=> _showFullScreenDialog(context),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.20,
+                  decoration: BoxDecoration(
+                      color: Colors.grey, borderRadius: BorderRadius.circular(20)),
+                ),
               )
             ],
           ),
