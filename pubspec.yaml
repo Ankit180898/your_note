@@ -40,7 +40,7 @@ dependencies:
   sqflite:
   path:
   flutter_local_notifications:
-  timezone:
+#  timezone:
 
 dev_dependencies:
   flutter_test:
