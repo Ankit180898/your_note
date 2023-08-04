@@ -10,4 +10,7 @@ class ScheduleTaskModel {
     this.isCompleted = false,
     required this.scheduledTime,
   });
+
+  
+  
 }
