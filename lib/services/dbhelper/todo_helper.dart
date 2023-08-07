@@ -58,7 +58,14 @@ class TodoDBHelper {
   }
 
   RxList<Todo> todos = <Todo>[].obs;
-
+  RxList<ScheduleTaskModel> tasks=<ScheduleTaskModel>[].obs;
+  Future<void> getTasks() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('tasks');
+    tasks.value = List.generate(maps.length, (i) {
+      return ScheduleTaskModel.fromMap(maps[i]);
+    });
+  }
   Future<void> getTodos() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('todos');
